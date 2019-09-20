@@ -8,7 +8,8 @@ module top(
 		
 		logic [31:0] readdata;
 		// instantiate processor and memories
-		mips mips(clk, reset, adr, writedata, memwrite, readdata);
+		mips mips(.clk(clk), .reset(reset), .addr(adr),
+			 .write_data(writedata), .mem_write(memwrite), .read_data(readdata));
 		
 		mem mem(clk, memwrite, adr, writedata, readdata);
 		
