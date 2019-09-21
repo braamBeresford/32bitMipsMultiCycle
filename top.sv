@@ -1,5 +1,5 @@
-//This top module is provided by "igital Design and Computer Architecture" 
-//for compatability with they test bench. All modules are my original HDL.
+//This top module is provided by "Digital Design and Computer Architecture 2nd Edition" 
+//for compatability with their test bench. All other modules are my HDL.
 module top(
 			input  logic       clk, reset,
 			output logic [31:0] writedata, adr,
