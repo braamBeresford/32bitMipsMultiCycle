@@ -1,4 +1,4 @@
-module data_path #(BIT_WIDTH = 16)(
+module data_path (
     input logic [14:0] control_bus,
     input logic [31:0] read_data,
     input logic clk,
@@ -13,10 +13,9 @@ module data_path #(BIT_WIDTH = 16)(
     logic RegDst, MemtoReg;
     logic [1:0] PCSrc, ALUSrcB;
     logic [2:0] ALUControl;
-    logic [BIT_WIDTH-1:0] ALUOut;
+    logic [31:0] ALUOut;
 	 
-	logic [31:0] instr;
-    // logic [4:0]  WA3;
+	logic [31:0] instr, PCJump;
 
 
     assign { IorD, MemWrite,  IRWrite, PCEn, ALUSrcA,
@@ -54,7 +53,65 @@ module data_path #(BIT_WIDTH = 16)(
                             .A3(WA3), .RD1(RD1), .RD2(RD2)
                         );
 
+    double_flopr #(32)  register_read_flop
+                        (
+                            .clk(clk), .in0(RD1),
+                            .in1(RD2), .out0(A), .out1(write_data)
+                        );  
+
+    mux2  #(32)         src_A_mux
+                        (
+                            .select(ALUSrcA), .in0(PC),
+                            .in1(A), .out(SrcA)
+                        );
+
+
+    mux4  #(32)         src_B_mux
+                        (
+                            .select(ALUSrcB), .in0(write_data),
+                            .in1(32'h4), .in2(SignImm), 
+                            .in3(shift_signImm), .out(SrcB)
+                        );
+
+    sign_extend         sign_extend
+                        (
+                            .in(instr[15:0]), .out(SignImm)
+                        );            
+
+    shift_left_2        sl2_alu_srcB (.in(SignImm), .out(shift_signImm));
+    
+    ALU                 alu
+                        (
+                            .src_A(SrcA), .src_B(SrcB),
+                            .alu_control(ALUControl), 
+                            .alu_res(ALUResult), .zero(zero)
+                        );
+
+    flopr #(32)         ALU_flop
+                        (
+                            .clk(clk), .in(ALUResult),
+                            .out(ALUOut)
+                        );
+
+    logic [31:0] shifted_address;
+    shift_left_2        addr_shift
+                        (
+                            .in(instr[25:0]), .out(shifted_address)
+                        );
+
+    assign PCJump = {PC[31:28], shifted_address[27:0]};
+
+    mux4 #(32)          PCSrc_mux
+                        (
+                            .in0(ALUResult), .in1(ALUOut),
+                            .in2(PCJump), .in3(32'b0),   //We need a three way mux
+                            .out(next_PC)
+                        );
+
     //Op and function combo logic
     assign op = instr[31:26];
     assign funct = instr[5:0];
+
+    //Just to make namign pretier
+    // assign write_data = B;
 endmodule

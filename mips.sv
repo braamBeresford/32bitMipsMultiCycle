@@ -6,7 +6,7 @@ module mips(
 );
 
     
-    data_path #(32)    DP(
+    data_path     DP(
                     .control_bus(bus), .read_data(read_data),
                     .clk(clk), .write_data(write_data), .addr(addr),
                     .zero(zero), .op(op), .funct(funct)
