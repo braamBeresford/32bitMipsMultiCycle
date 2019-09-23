@@ -105,6 +105,7 @@ module data_path (
                         (
                             .in0(ALUResult), .in1(ALUOut),
                             .in2(PCJump), .in3(32'b0),   //We need a three way mux
+									 .select(PCSrc),
                             .out(next_PC)
                         );
 
