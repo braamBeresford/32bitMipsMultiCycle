@@ -1,0 +1,3 @@
+To keep the following state transition diagrams readable, only therelevant control signals are listed. 
+Select signals are listed only when their value matters; otherwise, they are don’t cares.
+Enable signals are listed only when they are asserted; otherwise, they are 0.
